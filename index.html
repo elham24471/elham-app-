@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Elham">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Elham's Command Center</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --bg1: #f5f5f3;
+  --bg2: #ebebea;
+  --text: #1a1a18;
+  --text2: #5a5a56;
+  --text3: #9a9a94;
+  --border: rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.18);
+  --radius: 10px;
+  --teal: #1D9E75; --teal-bg: #E1F5EE; --teal-text: #085041;
+  --purple: #534AB7; --purple-bg: #EEEDFE; --purple-text: #26215C;
+  --amber: #BA7517; --amber-bg: #FAEEDA; --amber-text: #412402;
+  --coral: #993C1D; --coral-bg: #FAECE7; --coral-text: #4A1B0C;
+  --blue: #185FA5; --blue-bg: #E6F1FB; --blue-text: #042C53;
+  --accent: #1D9E75;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c1a; --bg1: #242422; --bg2: #2c2c2a;
+    --text: #e8e8e2; --text2: #a8a8a0; --text3: #686862;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+    --teal-bg: #04342C; --teal-text: #9FE1CB;
+    --purple-bg: #26215C; --purple-text: #CECBF6;
+    --amber-bg: #412402; --amber-text: #FAC775;
+    --coral-bg: #4A1B0C; --coral-text: #F5C4B3;
+    --blue-bg: #042C53; --blue-text: #B5D4F4;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+
+/* HEADER */
+.header{padding:env(safe-area-inset-top,16px) 16px 0;background:var(--bg);position:relative;z-index:10}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:0.5px solid var(--border)}
+.app-title{font-size:17px;font-weight:600;letter-spacing:-.3px}
+.save-badge{font-size:11px;color:var(--accent);opacity:0;transition:opacity .3s;font-weight:500}
+.save-badge.show{opacity:1}
+
+/* BOTTOM NAV */
+.bottom-nav{display:flex;background:var(--bg);border-top:0.5px solid var(--border);padding:8px 0 env(safe-area-inset-bottom,8px);position:relative;z-index:10;flex-shrink:0}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 2px;cursor:pointer;opacity:.45;transition:opacity .15s;border:none;background:none;color:var(--text)}
+.nav-item.on{opacity:1;color:var(--accent)}
+.nav-icon{font-size:20px;line-height:1}
+.nav-label{font-size:10px;font-weight:500;letter-spacing:.2px}
+
+/* PAGES */
+.pages{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;overflow-y:auto;padding:16px 16px env(safe-area-inset-bottom,24px);display:none;-webkit-overflow-scrolling:touch}
+.page.on{display:block}
+
+/* CARDS */
+.card{background:var(--bg1);border:0.5px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.card-title{font-size:14px;font-weight:600;margin-bottom:10px;color:var(--text)}
+.muted{color:var(--text2);font-size:13px;line-height:1.65}
+.small{font-size:12px;color:var(--text3)}
+
+/* TIMELINE */
+.tl{display:flex;flex-direction:column;gap:8px}
+.tl-row{display:grid;grid-template-columns:58px 1fr;gap:8px;align-items:start}
+.tl-time{font-size:11px;color:var(--text3);padding-top:9px;font-weight:500}
+.tl-block{border-radius:10px;padding:8px 11px;border:0.5px solid var(--border)}
+.tl-block b{font-size:13px;font-weight:600;display:block;margin-bottom:2px}
+.tl-block span{font-size:12px;color:var(--text2);line-height:1.4}
+.c-teal{background:var(--teal-bg);border-color:rgba(29,158,117,.3);color:var(--teal-text)}
+.c-purple{background:var(--purple-bg);border-color:rgba(83,74,183,.3);color:var(--purple-text)}
+.c-amber{background:var(--amber-bg);border-color:rgba(186,117,23,.3);color:var(--amber-text)}
+.c-coral{background:var(--coral-bg);border-color:rgba(153,60,29,.3);color:var(--coral-text)}
+.c-blue{background:var(--blue-bg);border-color:rgba(24,95,165,.3);color:var(--blue-text)}
+.c-gray{background:var(--bg1);color:var(--text)}
+
+/* CHECKLIST */
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:0.5px solid var(--border);cursor:pointer}
+.check-item:last-child{border-bottom:none}
+.check-box{width:22px;height:22px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;background:var(--bg)}
+.check-item.done .check-box{background:var(--accent);border-color:var(--accent)}
+.check-item.done .check-box::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
+.check-item.done .check-main{text-decoration:line-through;color:var(--text3)}
+.check-main{font-size:14px;color:var(--text);line-height:1.4;font-weight:500}
+.check-sub{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* PROGRESS */
+.prog-wrap{margin-bottom:14px}
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.prog-label{font-size:12px;color:var(--text2);min-width:72px;font-weight:500}
+.prog-bar{flex:1;height:5px;background:var(--bg2);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;transition:width .4s ease}
+.prog-pct{font-size:12px;color:var(--text3);min-width:28px;text-align:right}
+
+/* PHASE ROADMAP */
+.phase{margin-bottom:20px}
+.phase-pill{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;margin-bottom:8px}
+.phase-title{font-size:15px;font-weight:600;margin-bottom:10px}
+.tracks{display:flex;flex-direction:column;gap:8px}
+.track{background:var(--bg1);border:0.5px solid var(--border);border-radius:10px;padding:10px 12px}
+.track-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:6px}
+.track-item{font-size:13px;color:var(--text2);padding:4px 0;border-bottom:0.5px solid var(--border);line-height:1.4}
+.track-item:last-child{border-bottom:none}
+.track-item::before{content:"→ ";color:var(--text3)}
+
+/* WEEK TRACKER */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:8px}
+.day-h{font-size:10px;color:var(--text3);text-align:center;padding-bottom:4px;font-weight:600}
+.day-cell{border-radius:8px;padding:8px 3px;font-size:10px;text-align:center;border:0.5px solid var(--border);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;color:var(--text3);background:var(--bg1);transition:all .15s;user-select:none}
+.day-cell .dc-label{font-size:10px;font-weight:600}
+.day-cell .dc-status{font-size:11px}
+.day-cell.gym-done{background:var(--teal-bg);border-color:rgba(29,158,117,.4);color:var(--teal-text)}
+.day-cell.walk-done{background:var(--purple-bg);border-color:rgba(83,74,183,.4);color:var(--purple-text)}
+.day-cell.both-done{background:var(--amber-bg);border-color:rgba(186,117,23,.4);color:var(--amber-text)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* COMEBACK */
+.comeback{background:var(--bg1);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:10px}
+.comeback-title{font-size:13px;font-weight:600;margin-bottom:5px;color:var(--teal)}
+.comeback-body{font-size:13px;color:var(--text2);line-height:1.65}
+
+/* NOTES */
+.note-area{width:100%;min-height:90px;border:0.5px solid var(--border2);border-radius:10px;padding:11px 12px;font-size:14px;color:var(--text);background:var(--bg);line-height:1.6;outline:none;resize:none;font-family:inherit;-webkit-appearance:none}
+.note-area:focus{border-color:var(--accent);outline:2px solid rgba(29,158,117,.2)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;font-size:13px;font-weight:500;border:0.5px solid var(--border2);border-radius:10px;background:var(--bg1);color:var(--text);cursor:pointer;margin:4px 4px 0 0;-webkit-appearance:none}
+.btn:active{opacity:.7}
+.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.reset-btn{font-size:13px;color:var(--text3);background:none;border:none;cursor:pointer;padding:4px 0}
+
+/* METRICS ROW */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.metric{background:var(--bg1);border-radius:10px;padding:10px 10px 8px;border:0.5px solid var(--border);text-align:center}
+.metric-n{font-size:20px;font-weight:700;color:var(--text);line-height:1.1}
+.metric-l{font-size:10px;color:var(--text3);margin-top:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+
+.divider{border:none;border-top:0.5px solid var(--border);margin:12px 0}
+.section-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px;margin-top:4px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="app-title">Elham's plan</div>
+    <span class="save-badge" id="save-badge">saved ✓</span>
+  </div>
+</div>
+
+<div class="pages">
+
+  <!-- PAGE: SCHEDULE -->
+  <div class="page on" id="page-schedule">
+    <div class="card">
+      <div class="card-title">🌅 Morning — before lab</div>
+      <div class="tl">
+        <div class="tl-row"><div class="tl-time">5:00 am</div><div class="tl-block c-amber"><b>Wake + bathroom + face</b><span>15–20 min · no phone · drink water immediately</span></div></div>
+        <div class="tl-row"><div class="tl-time">5:20 am</div><div class="tl-block c-purple"><b>Journal + meditation</b><span>3 gratitudes · today's ONE priority · 5 min breathing</span></div></div>
+        <div class="tl-row"><div class="tl-time">6:00 am</div><div class="tl-block c-gray"><b>Pack bag + prep husband's food</b><span>30 min · clothes, water bottle, snack, his breakfast</span></div></div>
+        <div class="tl-row"><div class="tl-time">6:30 am</div><div class="tl-block c-teal"><b>Drive to gym (20 min)</b><span>Podcast or silence · no news</span></div></div>
+        <div class="tl-row"><div class="tl-time">6:50 am</div><div class="tl-block c-teal"><b>Gym — Mon / Wed / Fri</b><span>Sister's strength plan · 60 min · fasted is fine</span></div></div>
+        <div class="tl-row"><div class="tl-time">—</div><div class="tl-block c-teal"><b>Walk — Tue / Thu / Sat</b><span>30–40 min · 4,000–5,000 steps · no drive needed</span></div></div>
+        <div class="tl-row"><div class="tl-time">7:50 am</div><div class="tl-block c-amber"><b>Shower + drive to lab</b><span>Shower at gym · 30 min total · eating window opens</span></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔬 Lab — 9:00 am to 5:00 pm</div>
+      <div class="tl">
+        <div class="tl-row"><div class="tl-time">9:00 am</div><div class="tl-block c-amber"><b>Breakfast</b><span>1–2 eggs + 1 slice bread + coffee</span></div></div>
+        <div class="tl-row"><div class="tl-time">9:15 am</div><div class="tl-block c-purple"><b>PhD deep work block 1</b><span>Hardest task first · phone on DND · 90 min</span></div></div>
+        <div class="tl-row"><div class="tl-time">10:45 am</div><div class="tl-block c-coral"><b>Industry skill block (45 min)</b><span>Rotating focus — see Roadmap tab</span></div></div>
+        <div class="tl-row"><div class="tl-time">11:30 am</div><div class="tl-block c-purple"><b>PhD deep work block 2</b><span>Experiments · writing · advisor meetings · 90 min</span></div></div>
+        <div class="tl-row"><div class="tl-time">1:00 pm</div><div class="tl-block c-amber"><b>Lunch + walk</b><span>Real food · 20 min walk outside · 5,000+ steps</span></div></div>
+        <div class="tl-row"><div class="tl-time">2:00 pm</div><div class="tl-block c-purple"><b>PhD deep work block 3</b><span>Paper writing · lighter tasks · 3 hrs</span></div></div>
+        <div class="tl-row"><div class="tl-time">5:00 pm</div><div class="tl-block c-gray"><b>Hard stop — leave lab</b><span>Pack up and go. Work expands to fill time.</span></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🌙 Evening — home</div>
+      <div class="tl">
+        <div class="tl-row"><div class="tl-time">5:30 pm</div><div class="tl-block c-amber"><b>Cook dinner</b><span>Rice + protein + veg · done by 7 pm · window closes 8 pm</span></div></div>
+        <div class="tl-row"><div class="tl-time">7:00 pm</div><div class="tl-block c-blue"><b>Husband time</b><span>Dinner together · no phones at table</span></div></div>
+        <div class="tl-row"><div class="tl-time">8:30 pm</div><div class="tl-block c-gray"><b>Wind down</b><span>Reading · no screens · write tomorrow's ONE priority</span></div></div>
+        <div class="tl-row"><div class="tl-time">9:30 pm</div><div class="tl-block c-teal"><b>Sleep</b><span>7.5 hrs · non-negotiable</span></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗓 Weekend</div>
+      <div class="muted"><b style="font-weight:600">Saturday:</b> Drawing class · long walk · husband time. No lab.<br><b style="font-weight:600">Sunday:</b> 1 hr meal prep + light PhD review if needed + full rest.<br><br><b style="font-weight:600">Sunday meal prep (1 hr):</b> Boil 6–8 eggs · big batch rice · grill chicken or prep legumes · chop veg · portion containers. Each weekday dinner then takes 5 minutes.</div>
+    </div>
+  </div>
+
+  <!-- PAGE: CHECKLIST -->
+  <div class="page" id="page-checklist">
+    <div class="metrics">
+      <div class="metric"><div class="metric-n" id="cnt-morning">0/5</div><div class="metric-l">Morning</div></div>
+      <div class="metric"><div class="metric-n" id="cnt-lab">0/5</div><div class="metric-l">Lab</div></div>
+      <div class="metric"><div class="metric-n" id="cnt-eve">0/5</div><div class="metric-l">Evening</div></div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-row"><div class="prog-label">Morning</div><div class="prog-bar"><div class="prog-fill" id="prog-m" style="width:0%;background:var(--teal)"></div></div><div class="prog-pct" id="pct-m">0%</div></div>
+      <div class="prog-row"><div class="prog-label">Lab</div><div class="prog-bar"><div class="prog-fill" id="prog-l" style="width:0%;background:var(--purple)"></div></div><div class="prog-pct" id="pct-l">0%</div></div>
+      <div class="prog-row"><div class="prog-label">Evening</div><div class="prog-bar"><div class="prog-fill" id="prog-e" style="width:0%;background:var(--coral)"></div></div><div class="prog-pct" id="pct-e">0%</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🌅 Morning</div>
+      <div id="morning-list">
+        <div class="check-item" data-id="c0" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Woke at 5:00–5:30 am</div><div class="check-sub">No snooze. Water immediately.</div></div></div>
+        <div class="check-item" data-id="c1" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Journal — 3 gratitudes + ONE priority</div><div class="check-sub">Write it, don't just think it.</div></div></div>
+        <div class="check-item" data-id="c2" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Meditation / breathing (5 min)</div><div class="check-sub">App, YouTube, or just sit quietly.</div></div></div>
+        <div class="check-item" data-id="c3" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Husband's food prepped</div><div class="check-sub">Whatever he needs for the day.</div></div></div>
+        <div class="check-item" data-id="c4" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Gym OR walk done</div><div class="check-sub">Gym: Mon/Wed/Fri · Walk: Tue/Thu/Sat</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔬 Lab</div>
+      <div id="lab-list">
+        <div class="check-item" data-id="c5" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">PhD deep work block 1 (90 min)</div><div class="check-sub">Hardest task first. Phone on DND.</div></div></div>
+        <div class="check-item" data-id="c6" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Industry block done (45 min)</div><div class="check-sub">See Roadmap tab for today's focus.</div></div></div>
+        <div class="check-item" data-id="c7" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">PhD deep work blocks 2 + 3</div><div class="check-sub">Writing / experiments / meetings.</div></div></div>
+        <div class="check-item" data-id="c8" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Lunch walk done (~20 min)</div><div class="check-sub">Outside. Eyes off screen.</div></div></div>
+        <div class="check-item" data-id="c9" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Left lab by 5:00 pm</div><div class="check-sub">Hard stop. No exceptions.</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🌙 Evening</div>
+      <div id="eve-list">
+        <div class="check-item" data-id="c10" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Dinner eaten by 7:30 pm</div><div class="check-sub">Eating window closes at 8 pm.</div></div></div>
+        <div class="check-item" data-id="c11" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Quality time with husband</div><div class="check-sub">Phones away at dinner table.</div></div></div>
+        <div class="check-item" data-id="c12" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">Tomorrow's ONE priority written</div><div class="check-sub">Just one. Takes 2 minutes.</div></div></div>
+        <div class="check-item" data-id="c13" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">No screens after 9 pm</div><div class="check-sub">Book, conversation, or drawing.</div></div></div>
+        <div class="check-item" data-id="c14" onclick="toggle(this)"><div class="check-box"></div><div><div class="check-main">In bed by 9:30 pm</div><div class="check-sub">7.5 hours to your alarm.</div></div></div>
+      </div>
+    </div>
+    <div style="padding:4px 0 12px">
+      <button class="reset-btn" onclick="resetChecks()">↺ Reset today's checklist</button>
+    </div>
+    <div class="card" style="border-color:rgba(29,158,117,.3);background:var(--teal-bg)">
+      <div class="card-title" style="color:var(--teal-text)">Minimum viable day</div>
+      <div class="muted" style="color:var(--teal-text)">Wake · one journal sentence · 10 min movement · one PhD task · eat in window · sleep on time.<br><br><b style="font-weight:600">That day counts. That day is enough.</b></div>
+    </div>
+  </div>
+
+  <!-- PAGE: ROADMAP -->
+  <div class="page" id="page-roadmap">
+    <div class="card">
+      <div class="card-title">Daily industry block — rotating</div>
+      <div class="tl">
+        <div class="tl-row"><div class="tl-time" style="min-width:52px">Mon</div><div class="tl-block c-teal"><b>GitHub</b><span>README · benchmarks · docstrings</span></div></div>
+        <div class="tl-row"><div class="tl-time" style="min-width:52px">Tue</div><div class="tl-block c-purple"><b>CUDA / coding</b><span>Hands-on kernels · transformer optimization</span></div></div>
+        <div class="tl-row"><div class="tl-time" style="min-width:52px">Wed</div><div class="tl-block c-blue"><b>LinkedIn</b><span>Comment on 2 posts · connect with 1 engineer</span></div></div>
+        <div class="tl-row"><div class="tl-time" style="min-width:52px">Thu</div><div class="tl-block c-coral"><b>Interview prep</b><span>1 LeetCode medium · or system design</span></div></div>
+        <div class="tl-row"><div class="tl-time" style="min-width:52px">Fri</div><div class="tl-block c-amber"><b>Writing / applying</b><span>Blog post · paper draft · job application</span></div></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-pill tag-teal" style="background:var(--teal-bg);color:var(--teal-text)">Month 1 — July · Foundation</div>
+      <div class="tracks">
+        <div class="track"><div class="track-label">GitHub</div><div class="track-item">Write README for efficient-transformer-optimization</div><div class="track-item">Demo notebook for rl-fluid-resuscitation</div><div class="track-item">Pin 3 best repos to profile</div></div>
+        <div class="track"><div class="track-label">CUDA</div><div class="track-item">NVIDIA guide chapters 1–4</div><div class="track-item">Set up dev environment</div><div class="track-item">First kernel: vector addition</div></div>
+        <div class="track"><div class="track-label">Interview</div><div class="track-item">Set up LeetCode account</div><div class="track-item">1 easy problem per Thursday</div></div>
+        <div class="track"><div class="track-label">LinkedIn</div><div class="track-item">Update headline + about</div><div class="track-item">Connect with 5 engineers at target companies</div></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-pill" style="background:var(--purple-bg);color:var(--purple-text)">Month 2 — August · Build + publish</div>
+      <div class="tracks">
+        <div class="track"><div class="track-label">GitHub</div><div class="track-item">CUDA-accelerated inference project</div><div class="track-item">PR on openelm-max repo</div><div class="track-item">Blog post #1 on RL work</div></div>
+        <div class="track"><div class="track-label">CUDA</div><div class="track-item">Guide chapters 5–8</div><div class="track-item">Memory optimization kernel</div><div class="track-item">Benchmark vs CPU baseline</div></div>
+        <div class="track"><div class="track-label">Interview</div><div class="track-item">1 medium LeetCode per Thursday</div><div class="track-item">Solo mock system design</div></div>
+        <div class="track"><div class="track-label">Publication</div><div class="track-item">Identify ML4H or Safe RL workshop</div><div class="track-item">Outline + draft abstract</div></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-pill" style="background:var(--amber-bg);color:var(--amber-text)">Month 3 — September · Deepen + apply</div>
+      <div class="tracks">
+        <div class="track"><div class="track-label">GitHub</div><div class="track-item">CUDA project completed + documented</div><div class="track-item">Blog post #2</div><div class="track-item">3 polished repos done</div></div>
+        <div class="track"><div class="track-label">Interview</div><div class="track-item">2 mediums per week</div><div class="track-item">STAR behavioral prep</div><div class="track-item">1 mock interview with a friend</div></div>
+        <div class="track"><div class="track-label">Applying</div><div class="track-item">Resume final version</div><div class="track-item">Apply to 3–5 target roles</div></div>
+        <div class="track"><div class="track-label">Publication</div><div class="track-item">Paper draft complete</div><div class="track-item">Submit to workshop or arXiv</div></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-pill" style="background:var(--coral-bg);color:var(--coral-text)">Month 4 — October · Interview season</div>
+      <div class="tracks">
+        <div class="track"><div class="track-label">Interview</div><div class="track-item">Daily LeetCode 30 min</div><div class="track-item">2+ mocks per week</div><div class="track-item">ML system design prep</div></div>
+        <div class="track"><div class="track-label">Applying</div><div class="track-item">Active apps + follow-ups</div><div class="track-item">Negotiate timeline around defense</div></div>
+        <div class="track"><div class="track-label">PhD</div><div class="track-item">Dissertation near-final</div><div class="track-item">Defense date set</div><div class="track-item">Protect PhD time from interviews</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: TRACKER -->
+  <div class="page" id="page-tracker">
+    <div class="card">
+      <div class="card-title">This week — movement</div>
+      <div class="week-grid" id="day-labels">
+        <div class="day-h">Mon</div><div class="day-h">Tue</div><div class="day-h">Wed</div><div class="day-h">Thu</div><div class="day-h">Fri</div><div class="day-h">Sat</div><div class="day-h">Sun</div>
+      </div>
+      <div class="week-grid" id="week-cells"></div>
+      <div class="legend">
+        <div class="leg"><div class="leg-dot" style="background:var(--teal)"></div>Gym</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--purple)"></div>Walk</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--amber)"></div>Both</div>
+      </div>
+      <div style="margin-top:10px"><button class="reset-btn" onclick="resetWeek()">↺ Reset this week</button></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Industry block — this week</div>
+      <div class="check-item" data-id="it0" onclick="toggleWeek(this)"><div class="check-box"></div><div><div class="check-main">Monday — GitHub update</div><div class="check-sub">README / benchmarks / docstrings</div></div></div>
+      <div class="check-item" data-id="it1" onclick="toggleWeek(this)"><div class="check-box"></div><div><div class="check-main">Tuesday — CUDA / coding</div><div class="check-sub">Hands-on technical work</div></div></div>
+      <div class="check-item" data-id="it2" onclick="toggleWeek(this)"><div class="check-box"></div><div><div class="check-main">Wednesday — LinkedIn</div><div class="check-sub">Post / comment / connect with 1 engineer</div></div></div>
+      <div class="check-item" data-id="it3" onclick="toggleWeek(this)"><div class="check-box"></div><div><div class="check-main">Thursday — LeetCode</div><div class="check-sub">1 problem, timed</div></div></div>
+      <div class="check-item" data-id="it4" onclick="toggleWeek(this)"><div class="check-box"></div><div><div class="check-main">Friday — writing / applying</div><div class="check-sub">Blog, paper draft, or application</div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Health — this week</div>
+      <div class="check-item" data-id="ht0" onclick="toggleWeek(this)"><div class="check-box"></div><div><div class="check-main">10,000 steps hit 5+ days</div><div class="check-sub">Morning walk + lunch walk splits it</div></div></div>
+      <div class="check-item" data-id="ht1" onclick="toggleWeek(this)"><div class="check-box"></div><div><div class="check-main">Ate within 14:10 window every day</div><div class="check-sub">First meal ~6:30 am · last by 8 pm</div></div></div>
+      <div class="check-item" data-id="ht2" onclick="toggleWeek(this)"><div class="check-box"></div><div><div class="check-main">3+ eggs eaten daily</div><div class="check-sub">Your protein anchor</div></div></div>
+      <div class="check-item" data-id="ht3" onclick="toggleWeek(this)"><div class="check-box"></div><div><div class="check-main">Sunday meal prep done</div><div class="check-sub">Rice · eggs · protein · veg — 1 hour</div></div></div>
+      <div class="check-item" data-id="ht4" onclick="toggleWeek(this)"><div class="check-box"></div><div><div class="check-main">In bed by 9:30 pm at least 5 nights</div></div></div>
+    </div>
+  </div>
+
+  <!-- PAGE: WHEN DOWN -->
+  <div class="page" id="page-down">
+    <div class="muted" style="margin-bottom:14px">Read this when you feel overwhelmed, behind, or like you want to give up.</div>
+    <div class="comeback"><div class="comeback-title">When you feel like you've fallen off track</div><div class="comeback-body">You haven't failed. You had a hard day. The habit is not dead — it's waiting. On a bad day, your minimum is 10 minutes of movement + one sentence in your journal. That's it. Streaks break for everyone. The people who succeed are the ones who restart the next morning without drama.</div></div>
+    <div class="comeback"><div class="comeback-title">When the green card wait feels unbearable</div><div class="comeback-body">This limbo is real and genuinely hard. It is not in your control. What is in your control: your health, your research, your skills, your relationships. You filed everything correctly. You are doing what you can. The wait is not a reflection of your worth or your future.</div></div>
+    <div class="comeback"><div class="comeback-title">When you feel behind on your career</div><div class="comeback-body">You have a PhD in mechatronics + biomedical AI, published research, GitHub projects in RL, transformer optimization, and the Modular ecosystem — and you are 33. You are not behind. You are building something that takes time to compound. Qualcomm and Waymo hire people with your profile every cycle.</div></div>
+    <div class="comeback"><div class="comeback-title">When weight loss feels slow</div><div class="comeback-body">Your body just stopped birth control. Your hormones are recalibrating. Cortisol from PhD stress actively fights fat loss. You are dealing with real biological headwinds. Strength training + steps + fasting + sleep is the right combination. Results lag effort by 4–6 weeks. Keep going.</div></div>
+    <div class="comeback"><div class="comeback-title">When everything feels urgent at once</div><div class="comeback-body">It isn't. Open your journal. Write the ONE thing that would make today feel successful. Do that one thing. Everything else can wait. You built a system — trust it. Today you just need to show up.</div></div>
+    <div class="comeback"><div class="comeback-title">What you've already proven</div><div class="comeback-body">You moved to a new country alone. You navigated immigration while doing a PhD. You gave up social media. You signed up for drawing classes. You asked for help and made a plan. You are not someone who gives up — you are someone who gets overwhelmed sometimes. That is completely different.</div></div>
+    <div class="card" style="border-color:rgba(29,158,117,.3);background:var(--teal-bg)">
+      <div class="card-title" style="color:var(--teal-text)">Your minimum viable day</div>
+      <div class="muted" style="color:var(--teal-text)">Wake · one journal sentence · 10 min movement · one PhD task · eat in window · sleep on time.<br><br><b style="font-weight:600">That day counts. That day is enough.</b></div>
+    </div>
+  </div>
+
+  <!-- PAGE: NOTES -->
+  <div class="page" id="page-notes">
+    <div class="card"><div class="card-title">This week's wins</div><textarea class="note-area" id="note-wins" placeholder="What went well? Even small things count..." rows="4" oninput="scheduleNoteSave()"></textarea></div>
+    <div class="card"><div class="card-title">What's hard right now</div><textarea class="note-area" id="note-hard" placeholder="Write it out — naming it helps." rows="4" oninput="scheduleNoteSave()"></textarea></div>
+    <div class="card"><div class="card-title">Next adjustment I want to make</div><textarea class="note-area" id="note-adjust" placeholder="One small change for next week?" rows="3" oninput="scheduleNoteSave()"></textarea></div>
+    <div class="card"><div class="card-title">Questions for my next Claude session</div><textarea class="note-area" id="note-q" placeholder="Save ideas to bring back to the conversation..." rows="4" oninput="scheduleNoteSave()"></textarea></div>
+  </div>
+
+</div><!-- /pages -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item on" id="nav-schedule" onclick="go('schedule',this)">
+    <span class="nav-icon">📅</span><span class="nav-label">Schedule</span>
+  </button>
+  <button class="nav-item" id="nav-checklist" onclick="go('checklist',this)">
+    <span class="nav-icon">✅</span><span class="nav-label">Checklist</span>
+  </button>
+  <button class="nav-item" id="nav-roadmap" onclick="go('roadmap',this)">
+    <span class="nav-icon">🗺</span><span class="nav-label">Roadmap</span>
+  </button>
+  <button class="nav-item" id="nav-tracker" onclick="go('tracker',this)">
+    <span class="nav-icon">📊</span><span class="nav-label">Tracker</span>
+  </button>
+  <button class="nav-item" id="nav-down" onclick="go('down',this)">
+    <span class="nav-icon">💛</span><span class="nav-label">When down</span>
+  </button>
+  <button class="nav-item" id="nav-notes" onclick="go('notes',this)">
+    <span class="nav-icon">📝</span><span class="nav-label">Notes</span>
+  </button>
+</nav>
+
+<script>
+// ── NAV ──────────────────────────────────────────────
+function go(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('on'));
+  document.getElementById('page-' + id).classList.add('on');
+  if (btn) btn.classList.add('on');
+}
+
+// ── STORAGE ───────────────────────────────────────────
+function saveLocal(key, val) {
+  try { localStorage.setItem('elham_' + key, JSON.stringify(val)); flashSaved(); } catch(e) {}
+}
+function loadLocal(key, fallback) {
+  try { const v = localStorage.getItem('elham_' + key); return v ? JSON.parse(v) : fallback; } catch(e) { return fallback; }
+}
+function flashSaved() {
+  const el = document.getElementById('save-badge');
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// ── DAILY CHECKLIST ───────────────────────────────────
+const CHECK_IDS = ['c0','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14'];
+const MORNING = ['c0','c1','c2','c3','c4'];
+const LAB = ['c5','c6','c7','c8','c9'];
+const EVE = ['c10','c11','c12','c13','c14'];
+
+function toggle(el) {
+  el.classList.toggle('done');
+  saveChecks();
+  updateProgress();
+}
+
+function saveChecks() {
+  const state = { date: new Date().toDateString() };
+  document.querySelectorAll('#page-checklist .check-item[data-id]').forEach(el => {
+    state[el.dataset.id] = el.classList.contains('done');
+  });
+  saveLocal('checks', state);
+}
+
+function loadChecks() {
+  const state = loadLocal('checks', {});
+  const today = new Date().toDateString();
+  if (state.date !== today) return; // auto-reset new day
+  document.querySelectorAll('#page-checklist .check-item[data-id]').forEach(el => {
+    if (state[el.dataset.id]) el.classList.add('done');
+  });
+}
+
+function updateProgress() {
+  function calcGroup(ids, cntId, progId, pctId) {
+    const items = document.querySelectorAll('#page-checklist .check-item[data-id]');
+    let done = 0;
+    items.forEach(el => { if (ids.includes(el.dataset.id) && el.classList.contains('done')) done++; });
+    const pct = Math.round((done / ids.length) * 100);
+    const cnt = document.getElementById(cntId);
+    const bar = document.getElementById(progId);
+    const pctEl = document.getElementById(pctId);
+    if (cnt) cnt.textContent = done + '/' + ids.length;
+    if (bar) bar.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
+  }
+  calcGroup(MORNING, 'cnt-morning', 'prog-m', 'pct-m');
+  calcGroup(LAB, 'cnt-lab', 'prog-l', 'pct-l');
+  calcGroup(EVE, 'cnt-eve', 'prog-e', 'pct-e');
+}
+
+function resetChecks() {
+  document.querySelectorAll('#page-checklist .check-item').forEach(el => el.classList.remove('done'));
+  updateProgress();
+  saveLocal('checks', { date: new Date().toDateString() });
+}
+
+// ── WEEK CELLS ────────────────────────────────────────
+const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const sClasses = ['', 'gym-done', 'walk-done', 'both-done'];
+const sLabels = ['—', 'Gym ✓', 'Walk ✓', 'Both ✓'];
+let cellStates = new Array(7).fill(0);
+
+function renderCells() {
+  const grid = document.getElementById('week-cells');
+  if (!grid) return;
+  grid.innerHTML = '';
+  days.forEach((d, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'day-cell ' + sClasses[cellStates[i]];
+    cell.innerHTML = '<span class="dc-label">' + d + '</span><span class="dc-status">' + sLabels[cellStates[i]] + '</span>';
+    cell.onclick = () => {
+      cellStates[i] = (cellStates[i] + 1) % 4;
+      renderCells();
+      saveLocal('weekcells', cellStates);
+    };
+    grid.appendChild(cell);
+  });
+}
+
+function resetWeek() {
+  cellStates = new Array(7).fill(0);
+  renderCells();
+  saveLocal('weekcells', cellStates);
+}
+
+// ── WEEK INDUSTRY + HEALTH ────────────────────────────
+function toggleWeek(el) {
+  el.classList.toggle('done');
+  const state = loadLocal('weekChecks', {});
+  state[el.dataset.id] = el.classList.contains('done');
+  saveLocal('weekChecks', state);
+}
+
+function loadWeekChecks() {
+  const state = loadLocal('weekChecks', {});
+  document.querySelectorAll('#page-tracker .check-item[data-id]').forEach(el => {
+    if (state[el.dataset.id]) el.classList.add('done');
+  });
+}
+
+// ── NOTES ─────────────────────────────────────────────
+let noteTimer;
+function scheduleNoteSave() {
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => {
+    const notes = {};
+    ['wins','hard','adjust','q'].forEach(k => {
+      const el = document.getElementById('note-' + k);
+      if (el) notes[k] = el.value;
+    });
+    saveLocal('notes', notes);
+  }, 800);
+}
+
+function loadNotes() {
+  const notes = loadLocal('notes', {});
+  ['wins','hard','adjust','q'].forEach(k => {
+    const el = document.getElementById('note-' + k);
+    if (el && notes[k]) el.value = notes[k];
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────
+loadChecks();
+updateProgress();
+cellStates = loadLocal('weekcells', new Array(7).fill(0));
+renderCells();
+loadWeekChecks();
+loadNotes();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
